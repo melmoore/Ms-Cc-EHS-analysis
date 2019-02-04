@@ -19,10 +19,16 @@ library(extrafont)
 
 #Load data
 
-ehs <- read_csv("~/Manduca expts/Spring+Summer+Fall 2018/Early Ms+Cc heat shock/Ms+Cc-EHS-analysis/data/Ms+Cc_EHS_incomplete_clean.csv")
+ehs <- read_csv("data/Ms+Cc_EHS_incomplete_clean.csv", 
+                col_types = cols(hs.num = col_factor(levels = c("0", "1", "2", "3", "4")), 
+                                 hs.temp = col_factor(levels = c("0", "40", "42"))))
+
 View(ehs)
 
-ehs.long <- read_csv("~/Manduca expts/Spring+Summer+Fall 2018/Early Ms+Cc heat shock/Ms+Cc-EHS-analysis/data/Ms+Cc_EHS_incomplete_clean_long.csv")
+ehs.long <- read_csv("data/Ms+Cc_EHS_incomplete_clean_long.csv", 
+                     col_types = cols(hs.num = col_factor(levels = c("0", "1", "2", "3", "4")), 
+                                      hs.temp = col_factor(levels = c("0", "40", "42")), 
+                                      instar = col_factor(levels = c("3", "4", "5", "end.all"))))
 View(ehs.long)
 
 
@@ -841,4 +847,63 @@ numecl.sum.plot+geom_point(aes(shape=hs.temp),
         legend.title=element_text(size=20, face = "bold"),
         legend.background = element_rect(color="black",linetype="solid",size=2),
         legend.position = c(0.7, 0.8))
+
+
+#----------------------------
+
+#plotting incomp, prelim load figures
+
+#make num.unem NAs==0 for subsetting, then subset out undissected hosts
+ehs$num.unem[is.na(ehs$num.unem)]<-0
+ehs.em<-subset(ehs, num.unem!=0)
+View(ehs.em)
+
+
+#plot tot.surv by load
+
+survload.plot<-ggplot(ehs.em, aes(x=load, y=tot.surv, group=interaction(hs.temp, hs.num), color=hs.num))
+survload.plot+geom_point(aes(shape=hs.temp)
+)+geom_smooth(method=lm
+)+facet_wrap(~hs.temp)
+
+
+#plot stsp.ecl by num.em
+
+stspecl.plot<-ggplot(ehs.em, aes(x=num.em, y=stsp.ecl, color=hs.num))
+stspecl.plot+geom_point(
+)+geom_smooth(method=lm
+)+facet_wrap(~hs.temp)
+
+
+#plot percem by load
+
+percem.plot<-ggplot(ehs.em, aes(x=load, y=perc.em, color=hs.num))
+percem.plot+geom_point(
+)+geom_smooth(method=lm
+)+facet_wrap(~hs.temp)  
+  
+
+#plot num.em by load
+
+numem.plot<-ggplot(ehs.em, aes(x=load, y=num.em, color=hs.num))
+numem.plot+geom_point(
+)+geom_smooth(method=lm
+)+facet_wrap(~hs.temp)  
+
+
+#plot number unem by load
+
+numunem.plot<-ggplot(ehs.em, aes(x=load, y=num.unem, color=hs.num))
+numunem.plot+geom_point(
+)+geom_smooth(method=lm
+)+facet_wrap(~hs.temp) 
+
+
+#plot load by treatment
+
+load.plot<-ggplot(ehs.em, aes(x=hs.num, y=load, fill=hs.temp))
+load.plot+geom_boxplot(
+)+facet_wrap(~hs.temp)
+
+  
 
