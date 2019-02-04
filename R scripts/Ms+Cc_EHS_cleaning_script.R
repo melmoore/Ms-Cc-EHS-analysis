@@ -12,7 +12,10 @@ library(tidyr)
 
 #import data
 
-ehs <- read_csv("~/Manduca expts/Spring+Summer+Fall 2018/Early Ms+Cc heat shock/Ms+Cc-EHS-analysis/data/Ms+Cc_EHS_incomp_data_4-26-18.csv")
+ehs <- read_csv("data/Ms+Cc_EHS_incomp_data_2-4-19.csv", 
+                col_types = cols(hs.num = col_factor(levels = c("0", "1", "2", "3", "4")), 
+                                 hs.temp = col_factor(levels = c("0", "40", "42")), 
+                                 treatment = col_factor(levels = c("control", "para"))))
 View(ehs)
 
 
@@ -160,7 +163,11 @@ ehs<-ehs %>% mutate(ttem.w = date.em.j-date.ovp.j) %>%
 
 #Once I have load data, calculate % survival at each wasp stage
 
+#incomp load data 2-4-19
 
+ehs$tot.surv<-ehs$num.ecl/ehs$load
+ehs$perc.em<-ehs$num.em/ehs$load
+ehs$stsp.ecl<-ehs$num.ecl/ehs$num.em
 
 #--------------------------------
 
