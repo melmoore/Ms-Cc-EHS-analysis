@@ -12,7 +12,7 @@ library(tidyr)
 
 #import data
 
-ehs <- read_csv("data/Ms+Cc_EHS_incomp_data_2-4-19.csv", 
+ehs <- read_csv("data/Ms+Cc_EHS_incomp_data_2-24-20.csv", 
                 col_types = cols(hs.num = col_factor(levels = c("0", "1", "2", "3", "4")), 
                                  hs.temp = col_factor(levels = c("0", "40", "42")), 
                                  treatment = col_factor(levels = c("control", "para"))))
@@ -163,7 +163,7 @@ ehs<-ehs %>% mutate(ttem.w = date.em.j-date.ovp.j) %>%
 
 #Once I have load data, calculate % survival at each wasp stage
 
-#incomp load data 2-4-19
+#incomp load data 2-24-20
 
 ehs$tot.surv<-ehs$num.ecl/ehs$load
 ehs$perc.em<-ehs$num.em/ehs$load
