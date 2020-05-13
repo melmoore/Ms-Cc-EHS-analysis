@@ -14,6 +14,7 @@ library(mgcv)
 library(dplyr)
 library(viridis)
 library(cowplot)
+library(ResourceSelection)
 
 
 #Load data
@@ -134,15 +135,38 @@ class_mod_int <- glm(bin_class ~ hs.num:hs.temp,
 anova(class_mod, class_mod_hsn, class_mod_hst, class_mod_int, test="Chisq")
 
 
+hoslem.test(mtcars$vs, fitted(model))
+
+#Hosmer and Lemeshow goodness of fit (GOF) test
+hoslem.test(ehs_nc$bin_class, fitted(class_mod))
+
+
+#--------------------
+
+#plotting binary class data for each hs number and temperature
+bin_class_plot <- ggplot(ehs_nc, aes(x=as.numeric(hs.num), y=bin_class, color=hs.temp))
+bin_class_plot + stat_smooth(method="glm", method.args=list(family="binomial"), formula=y~x, 
+                             size=2
+) + geom_point(position=position_jitter(height=0.03, width=0.3)
+) + scale_y_continuous(breaks=c(0, 1), labels = c("WOWE", "em"))
 
 
 
+#seeing if I can plot with controls as well--doesn't really work well, as cons don't have hs.num values other 
+#than 0
 
+#remove wanderers
+ehs_nw <- subset(ehs, class!="wand")
 
+#create a binary class column
+ehs_nw$bin_class <- ifelse(ehs_nw$class=="mongo", 0, 1)
 
-
-
-
+#plot with controls
+bincl_wcon_plot <- ggplot(ehs_nw, aes(x=as.numeric(hs.num), y=bin_class, color=hs.temp))
+bincl_wcon_plot + stat_smooth(method="glm", method.args=list(family="binomial"), formula=y~x, 
+                             size=2
+) + geom_point(position=position_jitter(height=0.03, width=0.3)
+) + scale_y_continuous(breaks=c(0, 1), labels = c("WOWE", "em"))
 
 
 
