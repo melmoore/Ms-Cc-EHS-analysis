@@ -169,5 +169,97 @@ bincl_wcon_plot + stat_smooth(method="glm", method.args=list(family="binomial"),
 ) + scale_y_continuous(breaks=c(0, 1), labels = c("WOWE", "em"))
 
 
+#---------------------------
+
+#analyze wasp survival across treatments
+
+#create a tot.died column
+ehs_nw$tot.died <- ehs_nw$load - ehs_nw$num.ecl
+
+#subset to only those that have been dissected
+ehs_nw$num.unem[is.na(ehs_nw$num.unem)] <- 0
+
+ehs_nw$keep <- ifelse(ehs_nw$class=="em" & ehs_nw$num.unem > 0, 1, 
+                      ifelse(ehs_nw$class=="mongo", 1, 0))
+
+ehs_diss <- subset(ehs_nw, keep==1)
+
+
+#binomial glm of wasp survival--attempting to have control group included--doesn't work with controls
+wsurvecl_wcon_mod <- glm(cbind(num.ecl, tot.died) ~ hs.num * hs.temp * load,
+                         family = binomial,
+                         data = ehs_diss,
+                         na.action = na.omit)
+
+summary(wsurvecl_wcon_mod)
+
+
+
+#subset out controls
+ehs_dnc <- subset(ehs_diss, hs.num!=0)
+
+#looks like there were no hosts with emergence in 42.3, so there is a singularity in that term
+#ask James if the estimates from the rest of the model are ok?
+wsurvecl_ncon_mod <- glm(cbind(num.ecl, tot.died) ~ hs.num * hs.temp,
+                         family = binomial,
+                         data = ehs_dnc,
+                         na.action = na.omit)
+
+summary(wsurvecl_ncon_mod)
+
+
+wsurvecl_ncon_mod_hsn <- glm(cbind(num.ecl, tot.died) ~ hs.num,
+                             family = binomial,
+                             data = ehs_dnc,
+                             na.action = na.omit)
+
+wsurvecl_ncon_mod_hst <- glm(cbind(num.ecl, tot.died) ~ hs.temp,
+                             family = binomial,
+                             data = ehs_dnc,
+                             na.action = na.omit)
+
+
+wsurvecl_ncon_mod_int <- glm(cbind(num.ecl, tot.died) ~ hs.num:hs.temp,
+                             family = binomial,
+                             data = ehs_dnc,
+                             na.action = na.omit)
+
+anova(wsurvecl_ncon_mod, wsurvecl_ncon_mod_hsn, wsurvecl_ncon_mod_hst, wsurvecl_ncon_mod_int, test="Chisq")
+
+
+
+#rough analysis of wasp survival between controls with no heat shock and all heat shock treatments
+wsurvecl_hs_mod <- glm(cbind(num.ecl, tot.died) ~ hs,
+                       family = binomial,
+                       data = ehs_diss,
+                       na.action = na.omit)
+
+summary(wsurvecl_hs_mod)
+
+
+#-----------------------
+
+#create binary wasp survival column
+ehs_dnc$num.ecl[is.na(ehs_dnc$num.ecl)] <- 0
+ehs_dnc$bin_surv <- ifelse(ehs_dnc$class=="em" & ehs_dnc$num.ecl > 0, 1, 0)
+ehs_dnc$num.ecl[ehs_dnc$num.ecl==0] <- NA
+
+
+#plotting binomial of wasp survival (or attempting to)
+#points are proportion of surviving wasps, lines are binomial trends of wasp survival
+#not sure if this is quite appropriate
+ecl_surv_plot <- ggplot(ehs_dnc, aes(x=as.numeric(hs.num), y=tot.surv, color=hs.temp))
+ecl_surv_plot + geom_point(position=position_jitter(height=0.03, width=0.3),
+                           size=4
+) + stat_smooth(data = ehs_dnc, aes(y=bin_surv),
+                method="glm", method.args=list(family="binomial"), 
+                formula=y~x, size=2)
+
+
+
+
+
+
+
 
 
